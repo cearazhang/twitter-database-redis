@@ -73,12 +73,11 @@ class TwitterAPI:
         """
         tweet_key = f"Tweet:{twt.tweet_id}"
         tweet_data = {
-            
+            "user_id": twt.user_id,
+            "tweet_text": twt.tweet_text,
+            "tweet_ts": twt.tweet_ts
         }
-
-        sql = "INSERT INTO tweet (user_id, tweet_text, tweet_ts) VALUES (%s, %s, %s) "
-        val = (twt.user_id, twt.tweet_text, twt.tweet_ts)
-        self.dbu.insert_one(sql, val)
+        self.redis_db.hmset(tweet_key, tweet_data)
 
     def register_follows(self, fol: Follows):
         """

@@ -24,14 +24,14 @@ def main():
     os.environ["TWITTER_PASSWORD"] = 'cece2002'  # TODO fill in with your password
 
     # save tweets and follows data as dataframes
-    tweets_df = pd.read_csv('../data/tweet.csv')
-    follows_df = pd.read_csv('../data/follows.csv')
+    tweets_df = pd.read_csv('data/tweet.csv')
+    follows_df = pd.read_csv('data/follows.csv')
 
     # connect to twitter database with this user
     api = TwitterAPI(os.environ["TWITTER_USER"], os.environ["TWITTER_PASSWORD"], "twitter")
 
     # set up the database with its appropriate schema
-    api.setup_database()
+    # api.setup_database()
 
     # start a one-second timer
     sec_timer = time.time()
