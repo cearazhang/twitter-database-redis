@@ -1,6 +1,6 @@
 """
 Julia Geller and Ceara Zhang
-DS4300 / Twitter Relational Database
+DS4300 / Twitter Redis Database
 Created 14 Jan 2024
 Updated: 21 Jan 2024
 
@@ -14,25 +14,32 @@ import pandas as pd
 from twitter_mysql import TwitterAPI
 from twitter_objects import Tweet, Follows
 import time
-from datetime import datetime
 
 
 def main():
     # create user and password environment variables, must be done
     # upon re-running the program as these variables do not persist
     os.environ["TWITTER_USER"] = 'root'
-    os.environ["TWITTER_PASSWORD"] = 'cece2002'  # TODO fill in with your password
+    os.environ["TWITTER_PASSWORD"] = 'Starstar33!!'  # TODO fill in with your password
 
     # save tweets and follows data as dataframes
+<<<<<<< HEAD:twitter_tester.py
     tweets_df = pd.read_csv('data/tweet.csv')
     follows_df = pd.read_csv('data/follows.csv')
+=======
+    tweets_df = pd.read_csv('../sample_data/tweet.csv')
+    follows_df = pd.read_csv('../sample_data/follows.csv')
+>>>>>>> refs/remotes/origin/main:twitter_py/twitter_tester.py
 
     # connect to twitter database with this user
     api = TwitterAPI(os.environ["TWITTER_USER"], os.environ["TWITTER_PASSWORD"], "twitter")
 
+<<<<<<< HEAD:twitter_tester.py
     # set up the database with its appropriate schema
     # api.setup_database()
 
+=======
+>>>>>>> refs/remotes/origin/main:twitter_py/twitter_tester.py
     # start a one-second timer
     sec_timer = time.time()
     # save a counter of how many tweets have been posted in one second
@@ -41,7 +48,7 @@ def main():
     # insert the tweet rows into the table (i.e. post the tweets)
     for _, row in tweets_df.iterrows():
         # format the current time as the tweet's time posted
-        tweet_ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        tweet_ts = float(time.time())
         # create the Tweet object
         tweet = Tweet(row['USER_ID'], row['TWEET_TEXT'], tweet_ts)
         # post the tweet
