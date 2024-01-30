@@ -1,8 +1,8 @@
 """
 Julia Geller and Ceara Zhang
-DS4300 / Twitter Relational Database
-Created 14 Jan 2024
-Updated: 21 Jan 2024
+DS4300 / Twitter Redis Database
+Created 27 Jan 2024
+Updated: 30 Jan 2024
 
 twitter_mysql.py:
 Twitter Database API for MySQL
@@ -24,10 +24,14 @@ class TwitterAPI:
 
     def destroy_database(self):
         """
-        Destroys the twitter database (for testing purposes).
+        Destroys the twitter database (for testing purposes),
+        then closes the Redis connection
         """
         # destroy the twitter database
         self.redis_db.flushall()
+
+        # close the Redis connection
+        self.redis_db.close()
     
     def add_user(self, user_id: int):
         """
@@ -89,6 +93,22 @@ class TwitterAPI:
                 # add tweet to user's home timeline
                 self.redis_db.zadd(f'timeline_user_{f_id}', {self.next_tweet_id:twt.tweet_ts})
             self.next_tweet_id +=1
+
+    def post_tweet_str1(self, twt: Tweet):
+        """
+        Post a tweet to the tweet table w/out updating the home timeline
+        (strategy 1 OPTIONAL)
+
+        Args:
+        tweet: Tweet
+        """
+
+        # add tweet to the tweet hashmap
+        tweet_id = self.next_tweet_id
+        self.redis_db.hset(f'tweet:{tweet_id}', mapping={'user_id': twt.user_id, 'tweet_id': tweet_id, 'tweet_text':twt.tweet_text, 'tweet_ts': twt.tweet_ts})
+
+        # increment the tweet ID for the next tweet
+        self.next_tweet_id += 1
 
     def choose_rand_user(self) -> int:
         """

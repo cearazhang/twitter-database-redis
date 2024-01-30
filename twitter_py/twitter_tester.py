@@ -1,8 +1,8 @@
 """
 Julia Geller and Ceara Zhang
-DS4300 / Twitter Redis Database
-Created 14 Jan 2024
-Updated: 21 Jan 2024
+DS4300 / HW2 Twitter Redis Database
+Created 27 Jan 2024
+Updated: 30 Jan 2024
 
 twitter_tester.py:
 Driver that uses Twitter API to post tweets and
@@ -20,28 +20,20 @@ def main():
     # create user and password environment variables, must be done
     # upon re-running the program as these variables do not persist
     os.environ["TWITTER_USER"] = 'root'
-    os.environ["TWITTER_PASSWORD"] = 'Starstar33!!'  # TODO fill in with your password
+    os.environ["TWITTER_PASSWORD"] = ''  # TODO fill in with your password
 
     # save tweets and follows data as dataframes
-<<<<<<< HEAD:twitter_tester.py
-    tweets_df = pd.read_csv('data/tweet.csv')
-    follows_df = pd.read_csv('data/follows.csv')
-=======
-    tweets_df = pd.read_csv('../sample_data/tweet.csv')
-    follows_df = pd.read_csv('../sample_data/follows.csv')
->>>>>>> refs/remotes/origin/main:twitter_py/twitter_tester.py
+    tweets_df = pd.read_csv('../data/tweet.csv')
+    follows_df = pd.read_csv('../data/follows.csv')
+    # tweets_df = pd.read_csv('../data/tweets_sample.csv')
+    # follows_df = pd.read_csv('../data/follows_sample.csv')
 
     # connect to twitter database with this user
     api = TwitterAPI(os.environ["TWITTER_USER"], os.environ["TWITTER_PASSWORD"], "twitter")
 
-<<<<<<< HEAD:twitter_tester.py
-    # set up the database with its appropriate schema
-    # api.setup_database()
-
-=======
->>>>>>> refs/remotes/origin/main:twitter_py/twitter_tester.py
     # start a one-second timer
     sec_timer = time.time()
+
     # save a counter of how many tweets have been posted in one second
     twts_per_sec = 0
 
@@ -52,7 +44,9 @@ def main():
         # create the Tweet object
         tweet = Tweet(row['USER_ID'], row['TWEET_TEXT'], tweet_ts)
         # post the tweet
-        api.post_tweet(tweet)
+        # api.post_tweet(tweet)
+        api.post_tweet_str1(tweet)
+
         # increment the number of tweets posted if the second timer is not up
         if time.time() - sec_timer <= 1:
             twts_per_sec += 1
@@ -76,7 +70,8 @@ def main():
     # print number of home timelines retrieved per second
     print(f'{ht_per_sec} home timelines were retrieved in one second.')
 
-    # destroy database when done (for re-running/testing purposes)
+    # destroy database when done (for re-running/testing purposes),
+    # and close the connection
     api.destroy_database()
 
 

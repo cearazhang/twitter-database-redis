@@ -1,9 +1,9 @@
 
 """
 Julia Geller and Ceara Zhang
-DS4300 / Twitter Relational Database
-Created 14 Jan 2024
-Updated: 21 Jan 2024
+DS4300 / Twitter Redis Database
+Created 27 Jan 2024
+Updated: 27 Jan 2024
 
 twitter_objects.py:
 Create objects to be loaded into the twitter database
@@ -27,6 +27,10 @@ class Tweet:
 class Follows:
 
     def __init__(self, user_id: int, follows_id: int):
+        """
+        :param user_id: User ID
+        :param follows_id: person that's followed
+        """
         self.user_id = int(user_id)
         self.follows_id = int(follows_id)
 
