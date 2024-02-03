@@ -122,7 +122,36 @@ class TwitterAPI:
         user_ids = self.redis_db.smembers('users')
         user_id = random.choice(list(user_ids))
         return user_id
-    
+
+    def get_home_timeline_str1(self, user_id: int) -> List[Tuple[str, int]]:
+        """
+        OPTIONAL STRAT 1
+        Retrieves the home timeline of the given user,
+        query 10 most recent tweets from users they follow.
+
+        Args:
+        user_id: int
+
+        return:
+        result: List[Tuple[str, int]]
+        """
+        # get the user's followees
+        followees_ids = self.redis_db.smembers(f'followees_user_{user_id}')
+
+        # initialize an empty timeline
+        timeline = []
+
+        # retrieve 10 most recent tweets for each followee
+        for followee_id in followees_ids:
+            tweet_ids = self.redis_db.zrevrange(f'timeline_user_{followee_id}', 0, 9)
+            tweets = [(self.redis_db.hget(f'tweet:{tweet_id}', 'tweet_text'),
+                       self.redis_db.hget(f'tweet:{tweet_id}', 'tweet_ts')) for tweet_id in tweet_ids]
+            timeline.extend(tweets)
+
+        # sort the timeline by timestamp and return the latest 10 tweets
+        result = sorted(timeline, key=lambda x: x[1], reverse=True)[:10]
+        return result
+
     def get_home_timeline(self, user_id: int) -> List[Tuple[str, int]]:
         """
         Retrieves the home timeline of the given user,
