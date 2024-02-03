@@ -5,7 +5,7 @@ Created 27 Jan 2024
 Updated: 30 Jan 2024
 
 twitter_mysql.py:
-Twitter Database API for MySQL
+Twitter Database API for Redis
 """
 
 from twitter_objects import Tweet, Follows
