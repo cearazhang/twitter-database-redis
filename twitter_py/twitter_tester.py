@@ -25,8 +25,6 @@ def main():
     # save tweets and follows data as dataframes
     tweets_df = pd.read_csv('../data/tweet.csv')
     follows_df = pd.read_csv('../data/follows.csv')
-    # tweets_df = pd.read_csv('../data/tweets_sample.csv')
-    # follows_df = pd.read_csv('../data/follows_sample.csv')
 
     # connect to twitter database with this user
     api = TwitterAPI(os.environ["TWITTER_USER"], os.environ["TWITTER_PASSWORD"], "twitter")
