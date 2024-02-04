@@ -11,7 +11,7 @@ retrieve user home timelines.
 
 import os
 import pandas as pd
-from twitter_mysql import TwitterAPI
+from twitter_redis import TwitterAPI
 from twitter_objects import Tweet, Follows
 import time
 
