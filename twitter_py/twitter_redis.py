@@ -188,7 +188,7 @@ class TwitterAPI:
 
             # retrieve and print home timeline for the random user according to the specified strategy
             if strategy == 1:
-                home_timeline = self.get_home_timeline_str2(random_user_id)
+                home_timeline = self.get_home_timeline_str1(random_user_id)
             elif strategy == 2:
                 home_timeline = self.get_home_timeline_str2(random_user_id)
             else:

@@ -11,7 +11,7 @@ retrieve user home timelines.
 
 import os
 import pandas as pd
-from twitter_redis import TwitterAPI
+from twitter_py.twitter_redis import TwitterAPI
 from twitter_objects import Tweet, Follows
 import time
 
@@ -29,9 +29,8 @@ def main():
     # connect to twitter database with this user
     api = TwitterAPI(os.environ["TWITTER_USER"], os.environ["TWITTER_PASSWORD"], "twitter")
 
-    # start a one-second timer
-    sec_timer = time.time()
-
+    # start a timer
+    timer = time.time()
     # save a counter of how many tweets have been posted in one second
     twts_per_sec = 0
 
@@ -43,12 +42,13 @@ def main():
         tweet = Tweet(row['USER_ID'], row['TWEET_TEXT'], tweet_ts)
         # post the tweet
         api.post_tweet_str2(tweet)
-        # api.post_tweet_str1(tweet)
 
-        # increment the number of tweets posted if the second timer is not up
-        if time.time() - sec_timer <= 1:
-            twts_per_sec += 1
-    print(f'{twts_per_sec} tweets were posted in one second.')
+        # increment the number of tweets posted 
+        twts_per_sec += 1
+    
+    # compute time elapsed
+    elapsed_time = time.time() - timer
+    print(f'{twts_per_sec/elapsed_time} tweets were posted in one second.')
 
     # insert the follows rows into the table (i.e. register the tweets)
     for _, row in follows_df.iterrows():
@@ -56,17 +56,19 @@ def main():
         # register the follows
         api.register_follows(fols)
 
-    # start a one-second timer
-    sec_timer = time.time()
+    # start a timer
+    timer = time.time()
     # save a counter of how many home timelines are retrieved per second
     ht_per_sec = 0
-    while time.time() - sec_timer < 1:
+    for _ in range(500):
         # retrieve one user's home timeline
         api.simulate_home_timeline_refresh(1)
         # increment counter
         ht_per_sec += 1
+    # compute time elapsed
+    elapsed_time = timer - time.time()
     # print number of home timelines retrieved per second
-    print(f'{ht_per_sec} home timelines were retrieved in one second.')
+    print(f'{ht_per_sec/elapsed_time} home timelines were retrieved in one second.')
 
     # destroy database when done (for re-running/testing purposes),
     # and close the connection
