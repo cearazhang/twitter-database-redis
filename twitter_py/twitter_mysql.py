@@ -7,7 +7,6 @@ Updated: 30 Jan 2024
 twitter_mysql.py:
 Twitter Database API for Redis
 """
-
 from twitter_objects import Tweet, Follows
 from typing import List, Tuple
 import random
@@ -78,8 +77,10 @@ class TwitterAPI:
         # add user to users list
         self.add_user(fol.user_id)
 
-    def post_tweet(self, twt: Tweet):
+    def post_tweet_str2(self, twt: Tweet):
             """
+            STRATEGY 2
+            Post a tweet
             Use tweet ID as key and store tweet data as value
 
             Args:
@@ -123,6 +124,54 @@ class TwitterAPI:
         user_id = random.choice(list(user_ids))
         return user_id
 
+    # def get_home_timeline_str1(self, user_id: int) -> List[Tuple[str, int]]:
+    #     """
+    #     OPTIONAL STRAT 1
+    #     Retrieves the home timeline of the given user,
+    #     query 10 most recent tweets from users they follow.
+    #
+    #     Args:
+    #     user_id: int
+    #
+    #     return:
+    #     result: List[Tuple[str, int]]
+    #     """
+    #     # get the user's followees
+    #     followees_ids = self.redis_db.smembers(f'followees_user_{user_id}')
+    #
+    #     # initialize an empty timeline
+    #     timeline = []
+    #
+    #     # retrieve 10 most recent tweets for each followee
+    #     for followee_id in followees_ids:
+    #         tweet_ids = self.redis_db.zrevrange(f'timeline_user_{followee_id}', 0, 9)
+    #         tweets = [(self.redis_db.hget(f'tweet:{tweet_id}', 'tweet_text'),
+    #                    self.redis_db.hget(f'tweet:{tweet_id}', 'tweet_ts')) for tweet_id in tweet_ids]
+    #         timeline.extend(tweets)
+    #
+    #     # sort the timeline by timestamp and return the latest 10 tweets
+    #     result = sorted(timeline, key=lambda x: x[1], reverse=True)[:10]
+    #     return result
+
+    def get_home_timeline_str2(self, user_id: int) -> List[Tuple[str, int]]:
+        """
+        STRATEGY 2
+        Retrieves the home timeline of the given user,
+        query 10 most recent tweets from users they follow.
+
+        Args:
+        user_id: int
+
+        return:
+        result: pd.DataFrame
+        """
+        # get 10 most recent tweets on user's home timeline
+        tweet_ids = self.redis_db.zrevrange(f'timeline_user_{user_id}', 0, 9)
+        # result = [(self.redis_db.hget(f'tweet:{tweet_id}', 'tweet_text'), self.redis_db.hget(f'tweet:{tweet_id}', 'tweet_ts')) for tweet_id in tweet_ids]
+        timeline = [self.redis_db.hgetall(f'tweet:{tweet_id}') for tweet_id in tweet_ids]
+
+        return timeline
+
     def get_home_timeline_str1(self, user_id: int) -> List[Tuple[str, int]]:
         """
         OPTIONAL STRAT 1
@@ -138,35 +187,19 @@ class TwitterAPI:
         # get the user's followees
         followees_ids = self.redis_db.smembers(f'followees_user_{user_id}')
 
-        # initialize an empty timeline
-        timeline = []
+        # use pipeline for efficient batch retrieval
+        with self.redis_db.pipeline() as pipe:
+            for followee_id in followees_ids:
+                # retrieve 10 most recent tweets for each followee
+                pipe.zrevrange(f'timeline_user_{followee_id}', 0, 9, withscores=True)
+            tweet_data_list = pipe.execute()
 
-        # retrieve 10 most recent tweets for each followee
-        for followee_id in followees_ids:
-            tweet_ids = self.redis_db.zrevrange(f'timeline_user_{followee_id}', 0, 9)
-            tweets = [(self.redis_db.hget(f'tweet:{tweet_id}', 'tweet_text'),
-                       self.redis_db.hget(f'tweet:{tweet_id}', 'tweet_ts')) for tweet_id in tweet_ids]
-            timeline.extend(tweets)
+        # flatten the list of tweet_data
+        tweet_data = [tweet_data for sublist in tweet_data_list for tweet_data in sublist]
 
-        # sort the timeline by timestamp and return the latest 10 tweets
-        result = sorted(timeline, key=lambda x: x[1], reverse=True)[:10]
-        return result
-
-    def get_home_timeline(self, user_id: int) -> List[Tuple[str, int]]:
-        """
-        Retrieves the home timeline of the given user,
-        query 10 most recent tweets from users they follow.
-
-        Args:
-        user_id: int
-
-        return:
-        result: pd.DataFrame
-        """
-        # get 10 most recent tweets on user's home timeline
-        tweet_ids = self.redis_db.zrevrange(f'timeline_user_{user_id}', 0, 9)
-        result = [(self.redis_db.hget(f'tweet:{tweet_id}', 'tweet_text'), self.redis_db.hget(f'tweet:{tweet_id}', 'tweet_ts')) for tweet_id in tweet_ids]
-        return result
+        # sort the tweet_data by timestamp and return the latest 10 tweets
+        result = sorted(tweet_data, key=lambda x: x[1], reverse=True)[:10]
+        return [(self.redis_db.hget(f'tweet:{tweet_id}', 'tweet_text'), timestamp) for tweet_id, timestamp in result]
 
     def simulate_home_timeline_refresh(self, num_refreshes: int, verbose=False):
         """
@@ -182,7 +215,7 @@ class TwitterAPI:
             random_user_id = self.choose_rand_user()
 
             # retrieve and print home timeline for the random user
-            home_timeline = self.get_home_timeline(random_user_id)
+            home_timeline = self.get_home_timeline_str2(random_user_id)
             if verbose:
                 print(f"Home timeline for user {random_user_id}:")
                 for tweet in home_timeline:

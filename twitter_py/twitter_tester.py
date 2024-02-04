@@ -42,7 +42,7 @@ def main():
         # create the Tweet object
         tweet = Tweet(row['USER_ID'], row['TWEET_TEXT'], tweet_ts)
         # post the tweet
-        api.post_tweet(tweet)
+        api.post_tweet_str2(tweet)
         # api.post_tweet_str1(tweet)
 
         # increment the number of tweets posted if the second timer is not up
