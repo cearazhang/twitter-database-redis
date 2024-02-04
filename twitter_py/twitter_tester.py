@@ -42,7 +42,6 @@ def main():
         tweet = Tweet(row['USER_ID'], row['TWEET_TEXT'], tweet_ts)
         # post the tweet
         api.post_tweet_str2(tweet)
-        # api.post_tweet_str1(tweet)
 
         # increment the number of tweets posted 
         twts_per_sec += 1
@@ -61,7 +60,7 @@ def main():
     timer = time.time()
     # save a counter of how many home timelines are retrieved per second
     ht_per_sec = 0
-    while time.time() - sec_timer < 1:
+    for _ in range(500):
         # retrieve one user's home timeline
         api.simulate_home_timeline_refresh(1)
         # increment counter
