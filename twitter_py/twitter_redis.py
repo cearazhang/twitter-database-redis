@@ -4,7 +4,7 @@ DS4300 / Twitter Redis Database
 Created 27 Jan 2024
 Updated: 30 Jan 2024
 
-twitter_mysql.py:
+twitter_redis.py:
 Twitter Database API for Redis
 """
 from twitter_objects import Tweet, Follows
@@ -122,36 +122,7 @@ class TwitterAPI:
         """
         user_ids = self.redis_db.smembers('users')
         user_id = random.choice(list(user_ids))
-        return user_id
-
-    # def get_home_timeline_str1(self, user_id: int) -> List[Tuple[str, int]]:
-    #     """
-    #     OPTIONAL STRAT 1
-    #     Retrieves the home timeline of the given user,
-    #     query 10 most recent tweets from users they follow.
-    #
-    #     Args:
-    #     user_id: int
-    #
-    #     return:
-    #     result: List[Tuple[str, int]]
-    #     """
-    #     # get the user's followees
-    #     followees_ids = self.redis_db.smembers(f'followees_user_{user_id}')
-    #
-    #     # initialize an empty timeline
-    #     timeline = []
-    #
-    #     # retrieve 10 most recent tweets for each followee
-    #     for followee_id in followees_ids:
-    #         tweet_ids = self.redis_db.zrevrange(f'timeline_user_{followee_id}', 0, 9)
-    #         tweets = [(self.redis_db.hget(f'tweet:{tweet_id}', 'tweet_text'),
-    #                    self.redis_db.hget(f'tweet:{tweet_id}', 'tweet_ts')) for tweet_id in tweet_ids]
-    #         timeline.extend(tweets)
-    #
-    #     # sort the timeline by timestamp and return the latest 10 tweets
-    #     result = sorted(timeline, key=lambda x: x[1], reverse=True)[:10]
-    #     return result
+        return user_id    
 
     def get_home_timeline_str2(self, user_id: int) -> List[Tuple[str, int]]:
         """
@@ -201,7 +172,7 @@ class TwitterAPI:
         result = sorted(tweet_data, key=lambda x: x[1], reverse=True)[:10]
         return [(self.redis_db.hget(f'tweet:{tweet_id}', 'tweet_text'), timestamp) for tweet_id, timestamp in result]
 
-    def simulate_home_timeline_refresh(self, num_refreshes: int, verbose=False):
+    def simulate_home_timeline_refresh(self, num_refreshes: int, verbose=False, strategy=2):
         """
         Simulate the home timeline refresh by selecting a random
         user each time to retrieve their home timeline of the 10 most recent tweets.
@@ -209,13 +180,20 @@ class TwitterAPI:
         Args:
         num_refreshes: int
         verbose: bool
+        strategy: int
         """
         for _ in range(num_refreshes):
             # pick a random user
             random_user_id = self.choose_rand_user()
 
-            # retrieve and print home timeline for the random user
-            home_timeline = self.get_home_timeline_str2(random_user_id)
+            # retrieve and print home timeline for the random user according to the specified strategy
+            if strategy == 1:
+                home_timeline = self.get_home_timeline_str2(random_user_id)
+            elif strategy == 2:
+                home_timeline = self.get_home_timeline_str2(random_user_id)
+            else:
+                raise ValueError('Incorrect value given for strategy. Must be 1 or 2.')
+
             if verbose:
                 print(f"Home timeline for user {random_user_id}:")
                 for tweet in home_timeline:
