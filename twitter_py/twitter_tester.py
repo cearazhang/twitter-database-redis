@@ -66,7 +66,7 @@ def main():
         # increment counter
         ht_per_sec += 1
     # compute time elapsed
-    elapsed_time = timer - time.time()
+    elapsed_time = time.time() - timer
     # print number of home timelines retrieved per second
     print(f'{ht_per_sec/elapsed_time} home timelines were retrieved in one second.')
 
